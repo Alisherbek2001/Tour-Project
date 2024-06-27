@@ -28,13 +28,11 @@ def create_pdf(booking, qr_image):
     c.drawString(100, 650, f"Phone Number: {booking.phone_number}")
     c.drawString(100, 630, f"Comment: {booking.comment}")
 
-    # QR kodni vaqtinchalik faylga saqlash
     temp_buffer = BytesIO()
     qr_image.save(temp_buffer, format="PNG")
     temp_buffer.seek(0)
     qr_image_reader = ImageReader(temp_buffer)
 
-    # QR kodni PDF ga qo'shish
     c.drawImage(qr_image_reader, 400, 700, 100, 100)
     
     c.showPage()

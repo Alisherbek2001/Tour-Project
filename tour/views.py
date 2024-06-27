@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from account.models import Agency
 from rest_framework.response import Response
 from rest_framework import status
+import os
 
 
 class CategoryListCreateAPIView(ListCreateAPIView):
@@ -69,43 +70,80 @@ class TourRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     serializer_class = TourSerializer
     
     def update(self, request, *args, **kwargs):
-        data = request.data 
-        pk = self.kwargs.get('pk')
-        try:
-            categories = data.getlist('categories', [])
-            services = data.getlist('services', [])
-            images = request.FILES.getlist('images')
-            videos = request.FILES.getlist('videos')
-            tour = Tour.objects.get(pk=pk)
-            serializer = TourSerializer(tour,data=request.data, partial=(request.method=="PATCH"))
-            if serializer.is_valid():
-                serializer.save()
-                
-                for image in images:
-                    image.image.delete(save=False)
-                    image.delete()
-                    
-                for image in images:
-                    Image.objects.create(
-                        image=image,
-                        tour=tour
-                    )
-                for video in videos:
-                    video.video.delete(save=False)
-                    video.delete()
-                    
-                for video in videos:
-                    Video.objects.create(
-                        video=video,
-                        tour=tour
-                    )    
-                    
-        except Tour.DoesNotExist:
-            return Response('Tour not found',status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response(str(e),status=status.HTTP_400_BAD_REQUEST)
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        data = request.data
+
+        categories = data.getlist('categories', [])
+        services = data.getlist('services', [])
+        images = request.FILES.getlist('images')
+        videos = request.FILES.getlist('videos')
+
+        instance.name = data.get('name', instance.name)
+        instance.short_description = data.get('short_description', instance.short_description)
+        instance.description = data.get('description', instance.description)
+        instance.start_date = data.get('start_date', instance.start_date)
+        instance.end_date = data.get('end_date', instance.end_date)
+        instance.agency = get_object_or_404(Agency, id=data.get('agency', instance.agency.id))
+        instance.price = data.get('price', instance.price)
+        instance.seats = data.get('seats', instance.seats)
+        instance.save()
+
+        if categories:
+            instance.category.clear()
+            for category_id in categories:
+                category = get_object_or_404(Category, id=category_id)
+                instance.category.add(category)
+
+        if services:
+            instance.tourservice_set.all().delete()
+            for service in services:
+                TourService.objects.create(
+                    name=service,
+                    tour=instance
+                )
+
+        if images:
+            for image in instance.image_set.all():
+                if os.path.isfile(image.image.path):
+                    os.remove(image.image.path)
+                image.delete()
+            for image in images:
+                Image.objects.create(
+                    image=image,
+                    tour=instance
+                )
+
+        if videos:
+            for video in instance.video_set.all():
+                if os.path.isfile(video.video.path):
+                    os.remove(video.video.path)
+                video.delete()
+            for video in videos:
+                Video.objects.create(
+                    video=video,
+                    tour=instance
+                )
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        for image in instance.image_set.all():
+            if os.path.isfile(image.image.path):
+                os.remove(image.image.path)
+            image.delete()
         
+        for video in instance.video_set.all():
+            if os.path.isfile(video.video.path):
+                os.remove(video.video.path)
+            video.delete()
         
+        instance.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 class FeedbackListCreateAPIView(ListCreateAPIView):
     queryset = Feedback.objects.all()
     serializer_class = FeedbackSerializer
