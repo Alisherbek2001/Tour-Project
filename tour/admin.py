@@ -9,7 +9,28 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(Category,CategoryAdmin)
 
 
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ['id','image','tour','created_at','updated_at']
+admin.site.register(Image,ImageAdmin)
+
+
+class VideoAdmin(admin.ModelAdmin):
+    list_display = ['id','video','tour','created_at','updated_at']
+admin.site.register(Video,VideoAdmin)
+
+
+class ImageInline(admin.TabularInline):
+    model = Image
+    extra = 1
+    
+    
+class VideosInline(admin.TabularInline):
+    model = Video
+    extra = 1
+    
+    
 class TourAdmin(admin.ModelAdmin):
+    inlines = [ImageInline,VideosInline]
     list_display = ['name','start_date','end_date','agency','price','seats']
     list_per_page = 10
     list_editable = ['price','seats']
@@ -24,10 +45,10 @@ class TourServiceAdmin(admin.ModelAdmin):
 admin.site.register(TourService,TourServiceAdmin)
 
 
-class MediaTourAdmin(admin.ModelAdmin):
-    list_display = ['image','video','tour']
-    list_per_page = 10
-admin.site.register(MediaTour,MediaTourAdmin)
+# class MediaTourAdmin(admin.ModelAdmin):
+#     list_display = ['image','video','tour']
+#     list_per_page = 10
+# admin.site.register(MediaTour,MediaTourAdmin)
 
 
 class FeedbackAdmin(admin.ModelAdmin):

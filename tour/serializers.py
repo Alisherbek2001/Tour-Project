@@ -1,46 +1,61 @@
 from rest_framework import serializers
 from .models import *
-from account.serializers import AgencySerializer
+from account.serializers import Agency
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
-   
-        
-class TourSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(many=True)
-    # agency = AgencySerializer()
-    class Meta:
-        model = Tour
-        fields = '__all__'
-        
-    def create(self, validated_data):
-        categories_data = validated_data.pop('category')
-        agency_data = validated_data.pop('agency')
-        agency, created = Agency.objects.get_or_create(**agency_data)
-        tour = Tour.objects.create(agency=agency, **validated_data)
-        for category_data in categories_data:
-            category, created = Category.objects.get_or_create(**category_data)
-            tour.category.add(category)
-        return tour
-    
+
 
 class TourServiceSerializer(serializers.ModelSerializer):
-    # tour = serializers.PrimaryKeyRelatedField(queryset=Tour.objects.all())
     class Meta:
         model = TourService
         fields = '__all__'
   
         
-class MeadiTourSerializer(serializers.ModelSerializer):
+class ImageListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MediaTour
-        fields = '__all__'
- 
-         
+        model = Image
+        fields = ['image']
+
+
+class VideoListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = ['video']
+    
+
+class ServiceListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourService
+        fields = ['name']
+        
+        
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
         fields = '__all__'
+
+
+class TourCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['name']   
+
+class TourAgencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Agency
+        fields = ['name']  
+             
+class TourSerializer(serializers.ModelSerializer):
+    category = TourCategorySerializer(many=True)
+    services = ServiceListSerializer(source='tourservice_set', many=True, read_only=True)
+    images = ImageListSerializer(source='image_set', many=True, read_only=True)
+    videos = VideoListSerializer(source='video_set', many=True, read_only=True)
+    agency = TourAgencySerializer(many=False)
+    class Meta:
+        model = Tour
+        fields = ['id','name','category','agency','services','images','videos','short_description','description','start_date','end_date','price','seats']
+    

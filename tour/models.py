@@ -37,24 +37,18 @@ class Tour(BaseModel):
         
 class TourService(BaseModel):
     name = models.CharField(max_length=255)
-    description =  models.TextField
     tour = models.ForeignKey(Tour,on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.name
     
-
-class MediaTour(BaseModel):
-    image = models.ImageField(upload_to='tour_image',null=True,blank=True)
-    video = models.FileField(upload_to="tour_video",null=True,blank=True)
+class Image(BaseModel):
+    image = models.ImageField(upload_to="image/")
     tour = models.ForeignKey(Tour,on_delete=models.CASCADE)
     
-    def __str__(self) -> str:
-        return self.tour.name
-    
-    class Meta:
-        verbose_name = "Media"
-        verbose_name_plural = "Media"
+class Video(BaseModel):
+    video = models.FileField(upload_to='video/')
+    tour = models.ForeignKey(Tour,on_delete=models.CASCADE)
 
 class Feedback(BaseModel):
     tour = models.ForeignKey(Tour,on_delete=models.CASCADE)
