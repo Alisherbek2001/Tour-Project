@@ -16,4 +16,11 @@ class Booking(BaseModel):
     tour = models.ForeignKey(Tour,on_delete=models.CASCADE)
     status = models.CharField(choices=STATUS,max_length=9)
     phone_number = models.CharField(max_length=255)
-    comment = models.CharField(max_length=500)
+    comment = models.TextField()
+    
+    def __str__(self) -> str:
+        return f"{self.id} {self.user.first_name} {self.user.last_name} - {self.tour.name}"
+    
+    class Meta:
+        verbose_name = 'Booking'
+        verbose_name_plural = 'Bookings'

@@ -57,5 +57,5 @@ class TourSerializer(serializers.ModelSerializer):
     agency = TourAgencySerializer(many=False)
     class Meta:
         model = Tour
-        fields = ['id','name','category','agency','services','images','videos','short_description','description','start_date','end_date','price','seats']
+        fields = ['id','name','category','agency','services','images','videos','short_description','description','start_date','end_date','price','seats','average_rating']
     
