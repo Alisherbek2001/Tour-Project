@@ -9,7 +9,7 @@ User = get_user_model()
 class AgencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Agency
-        fields = '__all__'
+        fields = ['id','name','description','user','image','rating']
         
 
 class UserSerializer(serializers.ModelSerializer):

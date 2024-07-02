@@ -18,9 +18,11 @@ class VideosInline(admin.TabularInline):
     model = Video
     extra = 1
  
+ 
 class ServiceInline(admin.TabularInline):
     model = TourService
     extra = 1   
+    
     
 class TourAdmin(admin.ModelAdmin):
     inlines = [ImageInline,VideosInline,ServiceInline]

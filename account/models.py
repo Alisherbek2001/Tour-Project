@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from .managers import CustomUserManager
+from django.db.models import Avg
+
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(_("first name"), max_length=255)
@@ -33,6 +35,10 @@ class Agency(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='agency_image',null=True,blank=True)
     
+    @property
+    def rating(self):
+        from tour.models import TourRating
+        return TourRating.objects.filter(tour__agency=self).aggregate(Avg('rating'))['rating__avg']
     def __str__(self) -> str:
         return self.name
 

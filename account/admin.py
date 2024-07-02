@@ -31,7 +31,7 @@ admin.site.register(User,UserAdmin)
 
 
 class AgencyAdmin(admin.ModelAdmin):
-    list_display = ['name','user']
+    list_display = ['name','user','rating']
     list_per_page = 10
     search_fields = ['description']
 admin.site.register(Agency, AgencyAdmin)
